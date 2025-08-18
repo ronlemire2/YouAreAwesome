@@ -6,12 +6,17 @@
 //
 
 import SwiftUI
+import AVFAudio
 
 struct ContentView: View {
     @State private var message = ""
     @State private var imageName = ""
     @State private var lastMessageNumber = -1
     @State private var lastImageNumber = -1
+    @State private var lastSoundNumber = -1
+    @State private var audioPlayer: AVAudioPlayer!
+    let numberOfImages = 9 // images labeled image0 - image9
+    let numberOfSounds = 5 // images labeled image0 - image9
     
     var body: some View {
         VStack {
@@ -53,10 +58,33 @@ struct ContentView: View {
                 // Using repeat...while loop
                 var imageNumber: Int
                 repeat {
-                    imageNumber = Int.random(in: 0...9)
+                    imageNumber = Int.random(in: 0...numberOfImages)
                 } while imageNumber == lastImageNumber
                 imageName = "image\(imageNumber)"
                 lastImageNumber = imageNumber
+
+                var soundNumber: Int
+                repeat {
+                    soundNumber = Int.random(in: 0...numberOfSounds)
+                } while soundNumber == lastSoundNumber
+                //TODO: Remove 'if' code when 'toggle sound' is implemented
+                if soundNumber == 5 { // sound 5 is too long
+                    soundNumber = 0
+                }
+                let soundName = "sound\(soundNumber)"
+                lastSoundNumber = soundNumber
+                
+                guard let soundFile = NSDataAsset(name: soundName) else {
+                    print("😡 Could not read file named \(soundName)")
+                    return
+                }
+                do {
+                    audioPlayer = try AVAudioPlayer(data: soundFile.data)
+                    audioPlayer.play()
+                } catch {
+                    print("😡 ERROR: \(error.localizedDescription) creating audioPlayer.")
+                }
+                
             }
             .buttonStyle(.borderedProminent)
             .font(.title2)
