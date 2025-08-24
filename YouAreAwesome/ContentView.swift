@@ -5,117 +5,116 @@
 //  Created by Ron Lemire on 8/10/25.
 //
 
-import SwiftUI
-import AVFAudio
+    import SwiftUI
+    import AVFAudio
 
-struct ContentView: View {
-    @State private var message = ""
-    @State private var imageName = ""
-    @State private var lastMessageNumber = -1
-    @State private var lastImageNumber = -1
-    @State private var lastSoundNumber = -1
-    @State private var audioPlayer: AVAudioPlayer!
-    @State private var soundIsOn = true
-    
-    let numberOfImages = 10
-    let numberOfSounds = 6
-    
-    var body: some View {
-        VStack {
-            Text(message)
-                .font(.largeTitle)
-                .fontWeight(.heavy)
-                .foregroundStyle(.red)
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.5)
-                .frame(height: 100)
-                .animation(.easeInOut(duration: 0.15), value: message)
-            
-            Spacer()
-            
-            Image(imageName)
-                .resizable()
-                .scaledToFit()
-                .clipShape(RoundedRectangle(cornerRadius: 30))
-                .shadow(radius: 30)
-                .animation(.default, value: imageName)
-            
-            Spacer()
-            
-            HStack {
-                Text("Sound On:")
-                Toggle("", isOn: $soundIsOn)
-                    .labelsHidden()
-                    .onChange(of: soundIsOn) {
-                        if audioPlayer != nil && audioPlayer.isPlaying {
-                            audioPlayer.stop()
-                        }
-                    }
+    struct ContentView: View {
+        @State private var message = ""
+        @State private var imageName = ""
+        @State private var lastMessageNumber = -1
+        @State private var lastImageNumber = -1
+        @State private var lastSoundNumber = -1
+        @State private var audioPlayer: AVAudioPlayer!
+        @State private var soundIsOn = true
+        let numberOfImages = 10
+        let numberOfSounds = 6
+        
+        var body: some View {
+            VStack {
+                Text(message)
+                    .font(.largeTitle)
+                    .fontWeight(.heavy)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+                    .minimumScaleFactor(0.5)
+                    .frame(height: 100)
+                    .animation(.easeInOut(duration: 0.15), value: message)
                 
                 Spacer()
                 
-                Button("Show Message") {
-                    let messages = ["You are Awesome!",
-                                    "When the Genius Bar Needs Help, They Call You!",
-                                    "You are Great!",
-                                    "You are Fantastic!",
-                                    "Fabulous? That's You!",
-                                    "You Make Me Smile!"
-                                   ]
+                Image(imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                    .shadow(radius: 30)
+                    .animation(.default, value: imageName)
+                
+                Spacer()
+                
+                HStack {
+                    Text("Sound On:")
+                    Toggle("", isOn: $soundIsOn)
+                        .labelsHidden()
+                        .onChange(of: soundIsOn) {
+                            if audioPlayer != nil && audioPlayer.isPlaying {
+                                audioPlayer.stop()
+                            }
+                        }
                     
-                    lastMessageNumber = nonRepeatingRandom(lastNumber: lastMessageNumber, upperBound: messages.count-1)
-                    message = messages[lastMessageNumber]
+                    Spacer()
+                    
+                    Button("Show Message") {
+                        let messages = ["You are Awesome!",
+                                        "When the Genius Bar Needs Help, They Call You!",
+                                        "You are Great!",
+                                        "You are Fantastic!",
+                                        "Fabulous? That's You!",
+                                        "You Make Me Smile!"
+                                       ]
+                        
+                        lastMessageNumber = nonRepeatingRandom(lastNumber: lastMessageNumber, upperBound: messages.count-1)
+                        message = messages[lastMessageNumber]
 
-                    lastImageNumber = nonRepeatingRandom(lastNumber: lastImageNumber, upperBound: numberOfImages-1)
-                    imageName = "image\(lastImageNumber)"
+                        lastImageNumber = nonRepeatingRandom(lastNumber: lastImageNumber, upperBound: numberOfImages-1)
+                        imageName = "image\(lastImageNumber)"
 
-                    lastSoundNumber = nonRepeatingRandom(lastNumber: lastSoundNumber, upperBound: numberOfSounds-1)
-                    if soundIsOn {
-                        playSound(soundName: "sound\(lastSoundNumber)")
+                        lastSoundNumber = nonRepeatingRandom(lastNumber: lastSoundNumber, upperBound: numberOfSounds-1)
+                        if soundIsOn {
+                            playSound(soundName: "sound\(lastSoundNumber)")
+                        }
                     }
+                    .buttonStyle(.borderedProminent)
+                    .font(.title2)
                 }
-                .buttonStyle(.borderedProminent)
-                .font(.title2)
+            }
+            .padding()
+        }
+        
+        func nonRepeatingRandom(lastNumber: Int, upperBound: Int) -> Int {
+            var newNumber = Int.random(in: 0...upperBound)
+            while newNumber == lastNumber {
+                newNumber = Int.random(in: 0...upperBound)
+            }
+            return newNumber
+        }
+        
+        func playSound(soundName: String) {
+            if audioPlayer != nil && audioPlayer.isPlaying {
+                audioPlayer.stop()
+            }
+            guard let soundFile = NSDataAsset(name: soundName) else {
+                print("😡 Could not read file named \(soundName)")
+                return
+            }
+            do {
+                audioPlayer = try AVAudioPlayer(data: soundFile.data)
+                audioPlayer.play()
+            } catch {
+                print("😡 ERROR: \(error.localizedDescription) creating audioPlayer.")
             }
         }
-        .padding()
-    }
-    
-    func nonRepeatingRandom(lastNumber: Int, upperBound: Int) -> Int {
-        var newNumber = Int.random(in: 0...upperBound)
-        while newNumber == lastNumber {
-            newNumber = Int.random(in: 0...upperBound)
-        }
-        return newNumber
-    }
-    
-    func playSound(soundName: String) {
-        if audioPlayer != nil && audioPlayer.isPlaying {
-            audioPlayer.stop()
-        }
-        guard let soundFile = NSDataAsset(name: soundName) else {
-            print("😡 Could not read file named \(soundName)")
-            return
-        }
-        do {
-            audioPlayer = try AVAudioPlayer(data: soundFile.data)
-            audioPlayer.play()
-        } catch {
-            print("😡 ERROR: \(error.localizedDescription) creating audioPlayer.")
-        }
+
     }
 
-}
+    #Preview {
+        ContentView()
+    }
 
-#Preview {
-    ContentView()
-}
-
-//using repeat...while instead of while loop
-//func nonRepeatingRandom(lastNumber: Int, upperBound: Int) -> Int {
-//  var newNumber: Int
-//  repeat {
-//      newNumber = Int.random(in: 0...upperBound)
-//  } while newNumber == lastNumber
-//  return newNumber
-//}
+    //using repeat...while instead of while loop
+    //func nonRepeatingRandom(lastNumber: Int, upperBound: Int) -> Int {
+    //  var newNumber: Int
+    //  repeat {
+    //      newNumber = Int.random(in: 0...upperBound)
+    //  } while newNumber == lastNumber
+    //  return newNumber
+    //}`
