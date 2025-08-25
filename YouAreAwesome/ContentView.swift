@@ -76,6 +76,7 @@
                     .buttonStyle(.borderedProminent)
                     .font(.title2)
                 }
+                .tint(.accentColor)
             }
             .padding()
         }
@@ -106,8 +107,13 @@
 
     }
 
-    #Preview {
+    #Preview("Light Mode") {
         ContentView()
+            .preferredColorScheme(.light)
+    }
+    #Preview("Dark Mode") {
+        ContentView()
+            .preferredColorScheme(.dark)
     }
 
     //using repeat...while instead of while loop
